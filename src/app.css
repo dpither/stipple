@@ -1,0 +1,130 @@
+@import 'tailwindcss';
+@plugin '@iconify/tailwind4';
+
+@font-face {
+	font-family: 'Iosevka Web';
+	font-display: block;
+	font-weight: 400;
+	font-stretch: normal;
+	font-style: normal;
+	src: url('/fonts/Iosevka-Regular-subset.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Iosevka Web';
+	font-display: block;
+	font-weight: 500;
+	font-stretch: normal;
+	font-style: normal;
+	src: url('/fonts/Iosevka-Medium-subset.woff2') format('woff2');
+}
+
+@custom-variant hocus (&:hover, &:focus-visible);
+
+@theme {
+	--color-*: initial;
+	--color-bg: hsl(0, 0%, 0%);
+	--color-panel: hsl(0, 0%, 5%);
+	--color-border: hsl(0, 0%, 15%);
+	--color-muted: hsl(0, 0%, 55%);
+	--color-fg: hsl(0, 0%, 75%);
+	--color-accent: hsl(0, 0%, 95%);
+	--color-error: hsl(0, 65%, 55%);
+	--color-warn: hsl(40, 65%, 55%);
+	--color-success: hsl(140, 65%, 55%);
+
+	--font-text: 'Iosevka Web', monospace;
+
+	--ease-default: cubic-bezier(0.6, 0, 0.4, 1);
+
+	--animate-fade-in: fade-in var(--default-transition-duration) var(--ease-default);
+	--animate-fade-out: fade-out var(--default-transition-duration) var(--ease-default);
+	--animate-scale-in: scale-in var(--default-transition-duration) var(--ease-default);
+	--animate-scale-out: scale-out var(--default-transition-duration) var(--ease-default);
+
+	@keyframes fade-in {
+		0% {
+			opacity: 0;
+		}
+		100% {
+			opacity: 1;
+		}
+	}
+
+	@keyframes fade-out {
+		0% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+
+	@keyframes scale-in {
+		0% {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+	}
+
+	@keyframes scale-out {
+		0% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		100% {
+			opacity: 0;
+			transform: scale(0.95);
+		}
+	}
+}
+
+@layer base {
+	body {
+		font-variant-ligatures: none;
+	}
+}
+
+@layer components {
+	.transition-default {
+		transition: all var(--default-transition-duration) var(--ease-default);
+	}
+
+	.transition-colors-default,
+	.link {
+		transition-property:
+			color, background-color, border-color, outline-color, text-decoration-color, fill, stroke,
+			--tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
+		transition-timing-function: var(--ease-default);
+		transition-duration: var(--default-transition-duration);
+	}
+
+	.link {
+		outline-style: none;
+		color: var(--color-muted);
+		border-bottom: 1px solid var(--color-border);
+	}
+	.link:hover,
+	.link:focus-visible {
+		color: var(--color-accent);
+		border-bottom: 1px solid var(--color-accent);
+	}
+}
+
+::selection {
+	background: var(--color-accent);
+	color: var(--color-bg);
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+input[type='number'] {
+	appearance: textfield;
+}
