@@ -21,11 +21,7 @@ export function initKeyboardShortcuts(
 		// Duplicate Frame: D
 		// Delete Frame:    Delete
 
-		if (
-			e.key === ' ' &&
-			!activeElement?.matches(':focus-visible') &&
-			!activeElement?.matches(':focus')
-		) {
+		if (e.key === ' ' && !activeElement?.matches(':focus-visible')) {
 			e.preventDefault();
 			togglePlay();
 		} else if (!isPlaying() && e.key === '.') {

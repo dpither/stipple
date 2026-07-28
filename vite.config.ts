@@ -3,7 +3,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
 	plugins: [tailwindcss(), svelte()],
-	base: '/stipple/'
-});
+	base: mode === 'development' ? '' : '/stipple/'
+}));
