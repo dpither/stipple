@@ -29,12 +29,12 @@
 	>
 	<div class="bt absolute -top-px -right-px" class:hidden={!canDelete}>
 		<TooltipButton onclick={onDeleteFrame} tooltip="Delete frame [Delete]">
-			<span class="icon-[mdi--delete] size-4"></span>
+			<span class="icon-[material-symbols--delete-sharp] size-4"></span>
 		</TooltipButton>
 	</div>
 	<div class="absolute -right-px -bottom-px">
 		<TooltipButton onclick={onDuplicateFrame} tooltip="Duplicate frame [Shift + D]">
-			<span class="icon-[mdi--content-duplicate] size-4"></span>
+			<span class="icon-[material-symbols--content-copy-sharp] size-4"></span>
 		</TooltipButton>
 	</div>
 	<button

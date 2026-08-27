@@ -10,9 +10,9 @@
 			transition:fly|global={{ y: 4, duration: 150 }}
 		>
 			<div
-				class="bg-panel text-success border-border flex h-8 w-64 items-center gap-2 border px-2 text-xs"
+				class="bg-panel text-success border-border flex h-8 items-center gap-2 border px-2 text-xs"
 			>
-				<span class="icon-[mdi--success] text-success size-4"></span>{toast.message}
+				<span class="icon-[material-symbols--check] text-success size-4"></span>{toast.message}
 			</div>
 		</div>
 	{/key}

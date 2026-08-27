@@ -13,12 +13,7 @@
 </script>
 
 <Tooltip.Root>
-	<Tooltip.Trigger
-		class=" transition-colors-default border-border hocus:text-accent hocus:bg-border hocus:border-accent disabled:text-border flex cursor-pointer items-center justify-center border p-1 outline-none disabled:pointer-events-none"
-		aria-label={tooltip}
-		{disabled}
-		{onclick}
-	>
+	<Tooltip.Trigger class="btn" aria-label={tooltip} {disabled} {onclick}>
 		{@render children()}
 	</Tooltip.Trigger>
 	<Tooltip.Portal>

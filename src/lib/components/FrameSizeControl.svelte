@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Label } from 'bits-ui';
+	import { Label, Select } from 'bits-ui';
 
 	interface Props {
 		label: string;
@@ -22,41 +22,46 @@
 		onDecrement,
 		onChange
 	}: Props = $props();
+
+	const options = $derived(
+		Array.from({ length: max - min + 1 }, (_, i) => min + i).map((o) => ({
+			value: String(o),
+			label: String(o)
+		}))
+	);
+
+	function handleValueChange(newValue: string) {
+		onChange(parseInt(newValue, 10));
+	}
 </script>
 
 <div class="flex flex-col gap-1 text-xs md:flex-row md:items-center">
-	<Label.Root id="{label}-label" for={label} class="select-none">{label}</Label.Root>
-	<div class="flex h-full items-center gap-1">
-		<input
-			bind:value
-			{disabled}
-			onchange={(e) => {
-				onChange(parseInt(e.currentTarget.value) || min);
-			}}
-			id={label}
-			aria-labelledby="{label}-label"
-			{min}
-			{max}
-			type="number"
-			class="transition-colors-default border-border focus-visible:border-accent disabled:text-border box-content size-4 border p-1 outline-none disabled:pointer-events-none"
-		/>
-		{#snippet stepperButton(
-			label: string,
-			isDisabled: boolean,
-			onclick: () => void,
-			symbol: string
-		)}
-			<button
-				class="transition-colors-default border-border hover:border-accent hover:bg-border hover:text-accent disabled:text-border box-content flex h-1/2 w-4 cursor-pointer items-center justify-center border p-1 leading-0 disabled:pointer-events-none"
-				aria-label={label}
-				tabindex="-1"
-				disabled={isDisabled}
-				{onclick}>{symbol}</button
+	<Label.Root id="{label}-label" for={label}>{label}</Label.Root>
+	<Select.Root
+		type="single"
+		items={options}
+		value={String(value)}
+		onValueChange={handleValueChange}
+		{disabled}
+	>
+		<Select.Trigger id={label} aria-labelledby="{label}-label" class="btn ps-2"
+			>{value}<span class="icon-[mdi--chevron-down] size-4"></span></Select.Trigger
+		>
+		<Select.Portal>
+			<Select.Content
+				class="bg-panel border-border data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out flex w-(--bits-select-anchor-width) flex-col border p-1 text-xs outline-none"
+				side="top"
+				sideOffset={4}
 			>
-		{/snippet}
-		<div class="flex h-full flex-col">
-			{@render stepperButton('increment cols', value === max || disabled, onIncrement, '+')}
-			{@render stepperButton('decrement cols', value === min || disabled, onDecrement, '-')}
-		</div>
-	</div>
+				{#each options as option (option)}
+					<Select.Item
+						value={option.value}
+						label={option.label}
+						class="transition-colors-default hocus:bg-border data-highlighted:bg-border flex w-full cursor-pointer flex-col px-2 py-1 outline-none"
+						>{option.label}</Select.Item
+					>
+				{/each}</Select.Content
+			>
+		</Select.Portal></Select.Root
+	>
 </div>

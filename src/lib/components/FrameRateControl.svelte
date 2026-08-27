@@ -12,7 +12,7 @@
 </script>
 
 <div class="flex flex-col gap-2 text-xs md:flex-row md:items-center md:gap-1">
-	<Label.Root id="framerate-label" for="framerate" class="w-[6ch] text-right select-none">
+	<Label.Root id="framerate-label" for="framerate" class="w-[6ch] text-right">
 		{frameRate} FPS
 	</Label.Root>
 	<Slider.Root
@@ -23,7 +23,7 @@
 		aria-labelledby="framerate-label"
 		{min}
 		{max}
-		class="relative flex w-20 touch-none items-center select-none"
+		class="relative flex w-20 touch-none items-center"
 	>
 		<span class="border-border bg-panel relative h-2 w-full cursor-pointer overflow-hidden border"
 			><Slider.Range class="bg-fg absolute h-full"></Slider.Range></span

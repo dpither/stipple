@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Footer from './lib/components/Footer.svelte';
 	import { Tooltip } from 'bits-ui';
 	import Canvas from './lib/components/Canvas.svelte';
 	import Frame from './lib/components/Frame.svelte';
@@ -121,13 +120,24 @@
 	);
 </script>
 
-<svelte:head></svelte:head>
-
 <Tooltip.Provider delayDuration={400} skipDelayDuration={200}>
 	<div class="flex h-screen flex-col">
 		<!-- HEADER -->
-		<header class="bg-panel border-border flex border-b px-4 py-2">
-			<div class="flex justify-start"><Logo /></div>
+		<header class="flex items-center px-4 py-2">
+			<div class="flex items-baseline justify-start gap-4">
+				<Logo />
+				<div class="text-muted text-xs">
+					<a
+						href="https://github.com/dpither/stipple"
+						target="_blank"
+						rel="noopener noreferrer external"
+						aria-label="source code (opens in new tab)"
+						class="link flex items-center gap-1"
+					>
+						v1.0
+					</a>
+				</div>
+			</div>
 			<div class="flex flex-1 justify-end gap-2">
 				<ImportDialog onImport={importFrames} /><CopyDropdownMenu {frames} />
 			</div>
@@ -214,6 +224,5 @@
 				</div>
 			</div>
 		</div>
-		<Footer />
 	</div>
 </Tooltip.Provider>

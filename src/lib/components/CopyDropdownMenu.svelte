@@ -29,10 +29,8 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger
-		class="transition-colors-default border-border hocus:text-accent hocus:bg-border hocus:border-accent flex cursor-pointer items-center gap-1 border p-1 text-sm outline-none select-none md:gap-2 md:px-2"
-	>
-		<span class="icon-[mdi--content-copy] size-4"></span>
+	<DropdownMenu.Trigger class="btn text-sm md:gap-2 md:px-2">
+		<span class="icon-[material-symbols--content-copy-sharp] size-4"></span>
 		<span class="hidden md:inline">Copy as…</span>
 		<span class="icon-[mdi--chevron-down] size-4"></span>
 	</DropdownMenu.Trigger>
@@ -44,7 +42,7 @@
 		>
 			{#each exportOptions as option (option.label)}
 				<DropdownMenu.Item
-					class="transition-colors-default hocus:bg-border flex cursor-pointer flex-col px-2 py-1 outline-none select-none"
+					class="transition-colors-default hocus:bg-border flex cursor-pointer flex-col px-2 py-1 outline-none"
 					onSelect={() => handleSelect(option)}
 					><span class="text-sm">{option.label}</span><span class="text-muted text-xs"
 						>{option.subtitle}</span

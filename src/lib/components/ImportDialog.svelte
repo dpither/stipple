@@ -38,10 +38,8 @@
 </script>
 
 <Dialog.Root bind:open={isOpen} onOpenChangeComplete={reset}>
-	<Dialog.Trigger
-		class="transition-colors-default border-border hocus:text-accent hocus:bg-border hocus:border-accent flex cursor-pointer items-center gap-2 border p-1 text-sm outline-none select-none md:px-2"
-	>
-		<span class="icon-[mdi--import] size-4"></span>
+	<Dialog.Trigger class="btn text-sm md:gap-2 md:px-2">
+		<span class="icon-[material-symbols--upload-sharp] size-4"></span>
 		<span class="hidden md:inline">Import</span>
 	</Dialog.Trigger>
 	<Dialog.Portal>
@@ -53,7 +51,7 @@
 			>
 				<div class="border-border flex items-center justify-between border-b p-4">
 					<Dialog.Title class="flex items-center gap-2">
-						<span class="icon-[mdi--import] size-4"></span>
+						<span class="icon-[material-symbols--upload-sharp] size-4"></span>
 						<span class="leading-4">Import Animation</span>
 					</Dialog.Title>
 				</div>
@@ -77,15 +75,14 @@
 						<div class="border-border flex flex-col border">
 							<div class="flex h-8 gap-2 px-4 pt-4 text-xs">
 								{#if parsedFrames && !error}
-									<span class="icon-[mdi--success] text-success size-4"></span><span
+									<span class="icon-[material-symbols--check] text-success size-4"></span><span
 										class="text-success"
 										>Detected {parsedFrames.length} frame{parsedFrames.length > 1 ? 's' : ''}.</span
 									>
 								{/if}
 								{#if error}
-									<span class="icon-[mdi--close] text-error size-4 flex-none"></span><span
-										class="text-error">Error: {error}</span
-									>
+									<span class="icon-[material-symbols--close-sharp] text-error size-4 flex-none"
+									></span><span class="text-error">Error: {error}</span>
 								{/if}
 							</div>
 							<div class="flex h-24 w-full items-center gap-2 overflow-y-auto px-4">
@@ -110,20 +107,14 @@
 
 				<div class="border-border flex flex-col gap-2 border-t p-4">
 					<div class="flex items-center justify-center gap-2 text-xs">
-						<span class="icon-[mdi--warning] text-warn size-4"></span><span class="text-warn"
-							>Importing will replace the current animation.</span
+						<span class="icon-[material-symbols--warning-sharp] text-warn size-4"></span><span
+							class="text-warn">Importing will replace the current animation.</span
 						>
 					</div>
 					<div class="flex justify-end gap-2 text-sm">
-						<Dialog.Close
-							class="transition-colors-default border-border hocus:text-accent hocus:bg-border hocus:border-accent flex cursor-pointer items-center border px-2 py-1 outline-none select-none"
-							>Cancel</Dialog.Close
-						>
-						<button
-							class="transition-colors-default border-border hocus:text-accent hocus:bg-border hocus:border-accent disabled:text-border flex cursor-pointer items-center gap-2 border px-2 py-1 outline-none select-none disabled:pointer-events-none"
-							onclick={handleImport}
-							disabled={!parsedFrames || !!error}
-							><span class="icon-[mdi--import] size-4"></span>
+						<Dialog.Close class="btn px-2">Cancel</Dialog.Close>
+						<button class="btn px-2" onclick={handleImport} disabled={!parsedFrames || !!error}
+							><span class="icon-[material-symbols--upload-sharp] size-4"></span>
 							<span>Import</span></button
 						>
 					</div>
@@ -131,7 +122,7 @@
 				<Dialog.Close
 					class="transition-colors-default hocus:text-accent hocus:bg-border absolute top-3 right-3 flex cursor-pointer p-1 outline-none"
 				>
-					<span class="icon-[mdi--close] size-4"></span>
+					<span class="icon-[material-symbols--close-sharp] size-4"></span>
 					<span class="sr-only">Close</span>
 				</Dialog.Close>
 			</Dialog.Content>

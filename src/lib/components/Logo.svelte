@@ -38,7 +38,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="spacin flex items-center text-xl tracking-widest select-none"
+	class="spacin flex items-center text-xl tracking-widest"
 	onmouseenter={playAnimation}
 	aria-label="Stipple"
 >
