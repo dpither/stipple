@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { Tooltip } from 'bits-ui';
+	import { ScrollArea, Tooltip } from 'bits-ui';
 	import Canvas from './lib/components/Canvas.svelte';
 	import Frame from './lib/components/Frame.svelte';
 	import TooltipButton from './lib/components/TooltipButton.svelte';
-	import { onMount } from 'svelte';
-	import { initKeyboardShortcuts } from './lib/keyboardShortcuts.svelete';
-	import FrameRateControl from './lib/components/FrameRateControl.svelte';
+	import { onDestroy, onMount } from 'svelte';
+	import { initKeyboardShortcuts } from './lib/keyboardShortcuts';
+	import FPSControl from './lib/components/FPSControl.svelte';
 	import FrameSizeControl from './lib/components/FrameSizeControl.svelte';
 	import CopyDropdownMenu from './lib/components/CopyDropdownMenu.svelte';
 	import ImportDialog from './lib/components/ImportDialog.svelte';
@@ -20,10 +20,14 @@
 	} from './lib/braille';
 	import Logo from './lib/components/Logo.svelte';
 	import Toaster from './lib/components/Toaster.svelte';
-
-	const MIN_FRAME_RATE = 1;
-	const MAX_FRAME_RATE = 60;
-	const DEFAULT_FRAME_RATE = 12;
+	import {
+		DEFAULT_FPS,
+		MAX_FPS,
+		MIN_FPS,
+		onURLStateChange,
+		readStateFromURL,
+		syncStateToURL
+	} from './lib/appState';
 
 	let activeFrameIdx = $state(0);
 	let frames = $state([createEmptyFrame(MIN_ROWS, MIN_COLS)]);
@@ -31,11 +35,13 @@
 	let rows = $derived(activeFrame.length);
 	let cols = $derived(activeFrame[0].length);
 	let isPlaying = $state(false);
-	let frameRate = $state(DEFAULT_FRAME_RATE);
-	let interval = $state(-1);
+	let fps = $state(DEFAULT_FPS);
+	let playbackInterval = -1;
+	let unsubscribeHashChange: (() => void) | undefined;
 
 	function toggleDot(row: number, col: number, dotIdx: number) {
 		activeFrame[row][col][dotIdx] = !activeFrame[row][col][dotIdx];
+		syncStateToURL({ frames, fps });
 	}
 
 	function selectFrame(frameIdx: number) {
@@ -45,22 +51,23 @@
 	function addFrame() {
 		frames.push(createEmptyFrame(rows, cols));
 		activeFrameIdx = frames.length - 1;
+		syncStateToURL({ frames, fps });
 	}
 
 	function deleteFrame(frameIdx: number) {
 		if (frames.length === 1) return;
 		frames.splice(frameIdx, 1);
 		if (activeFrameIdx >= frameIdx) activeFrameIdx = Math.max(0, activeFrameIdx - 1);
+		syncStateToURL({ frames, fps });
 	}
 
 	function duplicateFrame(frameIdx: number) {
 		frames.push(copyFrame(frames[frameIdx]));
 		activeFrameIdx = frames.length - 1;
+		syncStateToURL({ frames, fps });
 	}
 
 	function resizeActiveFrame(newRows: number, newCols: number) {
-		newRows = Math.max(Math.min(newRows, MAX_ROWS), MIN_ROWS);
-		newCols = Math.max(Math.min(newCols, MAX_COLS), MIN_COLS);
 		const newFrame = createEmptyFrame(newRows, newCols);
 		for (let r = 0; r < Math.min(newRows, activeFrame.length); r++) {
 			for (let c = 0; c < Math.min(newCols, activeFrame[0].length); c++) {
@@ -70,27 +77,29 @@
 		frames[activeFrameIdx] = newFrame;
 		rows = newRows;
 		cols = newCols;
+		syncStateToURL({ frames, fps });
 	}
 
 	function tick() {
 		activeFrameIdx = (activeFrameIdx + 1) % frames.length;
 	}
 
-	function updateFrameRate(newFrameRate: number) {
-		frameRate = newFrameRate;
+	function updateFPS(newFPS: number) {
+		fps = Math.max(Math.min(newFPS, MAX_FPS), MIN_FPS);
 		if (isPlaying) {
-			clearInterval(interval);
-			interval = setInterval(tick, 1000 / frameRate);
+			clearInterval(playbackInterval);
+			playbackInterval = setInterval(tick, 1000 / fps);
 		}
+		syncStateToURL({ frames, fps });
 	}
 
 	function togglePlay() {
 		if (isPlaying) {
 			isPlaying = false;
-			clearInterval(interval);
+			clearInterval(playbackInterval);
 		} else {
 			isPlaying = true;
-			interval = setInterval(tick, 1000 / frameRate);
+			playbackInterval = setInterval(tick, 1000 / fps);
 		}
 	}
 
@@ -105,9 +114,10 @@
 	function importFrames(newFrames: Braille[][][]) {
 		activeFrameIdx = 0;
 		frames = newFrames;
+		syncStateToURL({ frames, fps });
 	}
 
-	onMount(() =>
+	onMount(() => {
 		initKeyboardShortcuts(
 			togglePlay,
 			() => isPlaying,
@@ -116,8 +126,24 @@
 			addFrame,
 			() => duplicateFrame(activeFrameIdx),
 			() => deleteFrame(activeFrameIdx)
-		)
-	);
+		);
+		const readState = readStateFromURL();
+		if (readState) {
+			frames = readState.frames;
+			fps = readState.fps;
+		}
+
+		unsubscribeHashChange = onURLStateChange((state) => {
+			if (state) {
+				frames = state.frames;
+				fps = state.fps;
+			}
+		});
+	});
+
+	onDestroy(() => {
+		unsubscribeHashChange?.();
+	});
 </script>
 
 <Tooltip.Provider delayDuration={400} skipDelayDuration={200}>
@@ -151,12 +177,7 @@
 			<div class="bg-panel border-border flex flex-col border-t">
 				<div class="border-border flex items-center gap-2 border-b px-4 py-2">
 					<div class="flex flex-1 justify-start">
-						<FrameRateControl
-							{frameRate}
-							min={MIN_FRAME_RATE}
-							max={MAX_FRAME_RATE}
-							onValueCommit={updateFrameRate}
-						/>
+						<FPSControl {fps} min={MIN_FPS} max={MAX_FPS} onValueCommit={updateFPS} />
 					</div>
 					<div class="flex justify-center">
 						<!-- TIME CONTROL -->
@@ -204,24 +225,34 @@
 					</div>
 				</div>
 				<!-- FRAME LIST -->
-				<div class="flex gap-2 overflow-x-auto px-4 py-4">
-					{#each frames as frame, idx (idx)}
-						<Frame
-							{frame}
-							label={idx + 1}
-							isActive={idx === activeFrameIdx}
-							canDelete={frames.length !== 1}
-							onSelectFrame={() => selectFrame(idx)}
-							onDeleteFrame={() => deleteFrame(idx)}
-							onDuplicateFrame={() => duplicateFrame(idx)}
-						/>
-					{/each}
-					<TooltipButton onclick={addFrame} tooltip="Add new frame [Shift + N]"
-						><div class="flex h-20 items-center justify-center">
-							<span class="icon-[mdi--add] size-4"></span>
-						</div></TooltipButton
+				<ScrollArea.Root type="auto" class="relative w-screen overflow-hidden">
+					<ScrollArea.Viewport class="focus-visible:border-b-accent border-border  w-full border-b">
+						<div class="flex gap-2 px-4 py-4">
+							{#each frames as frame, idx (idx)}
+								<Frame
+									{frame}
+									label={idx + 1}
+									isActive={idx === activeFrameIdx}
+									canDelete={frames.length !== 1}
+									onSelectFrame={() => selectFrame(idx)}
+									onDeleteFrame={() => deleteFrame(idx)}
+									onDuplicateFrame={() => duplicateFrame(idx)}
+								/>
+							{/each}
+							<TooltipButton onclick={addFrame} tooltip="Add new frame [Shift + N]"
+								><div class="flex h-20 items-center justify-center">
+									<span class="icon-[mdi--add] size-4"></span>
+								</div></TooltipButton
+							>
+						</div>
+					</ScrollArea.Viewport>
+					<ScrollArea.Scrollbar
+						orientation="horizontal"
+						class="border-border bg-panel flex h-2 border-t"
 					>
-				</div>
+						<ScrollArea.Thumb class="transition-colors-default bg-border hover:bg-accent" />
+					</ScrollArea.Scrollbar>
+				</ScrollArea.Root>
 			</div>
 		</div>
 	</div>

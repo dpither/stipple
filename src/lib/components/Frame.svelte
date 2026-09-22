@@ -19,7 +19,7 @@
 </script>
 
 <div
-	class=" border-border hover:border-accent has-focus-visible:border-accent relative flex-none overflow-hidden border"
+	class=" border-border hover:border-accent has-focus-visible:border-accent relative flex-none shrink-0 overflow-hidden border"
 	role="listitem"
 	class:border-muted={isActive}
 >

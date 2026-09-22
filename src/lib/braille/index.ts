@@ -1,6 +1,13 @@
 export type { Braille } from './types';
 
-export { GRID_TO_DOT, brailleToChar, charToBraille, isBrailleChar } from './core';
+export {
+	GRID_TO_DOT,
+	brailleToByte,
+	byteToBraille,
+	brailleToChar,
+	charToBraille,
+	isBrailleChar
+} from './core';
 
 export {
 	MIN_ROWS,
@@ -9,8 +16,14 @@ export {
 	MAX_COLS,
 	createEmptyFrame,
 	copyFrame,
-	frameToString,
-	validateFrames
+	frameToString
 } from './frame';
 
-export { framesToPlainText, framesToJSON, parseInput } from './formats';
+export {
+	MIN_FRAMES,
+	MAX_FRAMES,
+	validateFrames,
+	framesToPlainText,
+	framesToJSON,
+	parseInput
+} from './formats';

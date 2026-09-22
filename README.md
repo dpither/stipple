@@ -58,7 +58,5 @@ npm run preview
 ## Roadmap
 
 - Copy as CSS
-- Storing frame data in URL for easy sharing
 - Drag and drop to reorder frames
-- Preview window of actual text character animation 
-
+- Preview window of actual text character animation

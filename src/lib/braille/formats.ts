@@ -1,4 +1,44 @@
-import { brailleToChar, charToBraille, validateFrames, type Braille } from '.';
+import {
+	brailleToChar,
+	charToBraille,
+	MAX_COLS,
+	MAX_ROWS,
+	MIN_COLS,
+	MIN_ROWS,
+	type Braille
+} from '.';
+
+export const MIN_FRAMES = 1;
+export const MAX_FRAMES = 200;
+
+export function validateFrames(frames: Braille[][][]): void {
+	if (frames.length === 0) {
+		throw new Error(`Parsed 0 frames, minimum is ${MIN_FRAMES}.`);
+	}
+
+	if (frames.length > MAX_FRAMES) {
+		throw new Error(`Parsed ${frames.length} frames, maximum is ${MAX_FRAMES}.`);
+	}
+
+	for (const [i, frame] of frames.entries()) {
+		if (frame.length < MIN_ROWS || frame.length > MAX_ROWS) {
+			throw new Error(
+				`Frame ${i + 1} invalid, expected between ${MIN_ROWS} and ${MAX_ROWS} rows got ${frame.length}.`
+			);
+		}
+		const colCount = frame[0].length;
+		if (colCount < MIN_COLS || colCount > MAX_COLS) {
+			throw new Error(
+				`Frame ${i + 1} invalid, expected between ${MIN_COLS} and ${MAX_COLS} columns got ${colCount}.`
+			);
+		}
+		for (const row of frame) {
+			if (row.length !== colCount) {
+				throw new Error(`Frame ${i + 1} invalid, all rows must be equal length.`);
+			}
+		}
+	}
+}
 
 // Plain Text
 export function framesToPlainText(frames: Braille[][][]): string {

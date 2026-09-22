@@ -19,7 +19,7 @@
 	<Tooltip.Portal>
 		<Tooltip.Content
 			sideOffset={4}
-			class="animate-scale-in data-[state=closed]:animate-scale-out bg-panel border-border border px-2 py-1 text-xs"
+			class="animate-scale-in data-[state=closed]:animate-scale-out bg-panel border-border shrink-0 border px-2 py-1 text-xs"
 		>
 			{tooltip}
 		</Tooltip.Content>

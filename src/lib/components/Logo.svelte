@@ -37,10 +37,11 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
-	class="spacin flex items-center text-xl tracking-widest"
+<a
+	class="hocus:text-accent flex items-center text-xl tracking-widest outline-none"
+	href="/"
 	onmouseenter={playAnimation}
 	aria-label="Stipple"
 >
 	<span aria-hidden="true">{frames[index]}</span>
-</div>
+</a>

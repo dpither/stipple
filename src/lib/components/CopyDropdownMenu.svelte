@@ -13,18 +13,28 @@
 		{
 			label: 'Plain Text',
 			subtitle: 'Animation frames as text blocks',
-			getValue: () => framesToPlainText(frames)
+			getValue: () => framesToPlainText(frames),
+			copyText: 'plain text'
 		},
 		{
 			label: 'JSON',
 			subtitle: 'Animation frames as a data array',
-			getValue: () => framesToJSON(frames)
+			getValue: () => framesToJSON(frames),
+			copyText: 'JSON'
+		},
+		{
+			label: 'Link',
+			subtitle: 'Animation as a shareable link',
+			getValue: () => window.location.href,
+			copyText: 'a link'
 		}
 	];
 
 	async function handleSelect(option: (typeof exportOptions)[number]) {
 		await navigator.clipboard.writeText(option.getValue());
-		showToast(`Copied ${frames.length} frame${frames.length > 1 ? 's' : ''} as ${option.label}.`);
+		showToast(
+			`Copied ${frames.length} frame${frames.length > 1 ? 's' : ''} as ${option.copyText}.`
+		);
 	}
 </script>
 

@@ -22,6 +22,22 @@ export function brailleToChar(braille: Braille): string {
 	return String.fromCharCode(0x2800 + mask);
 }
 
+export function brailleToByte(braille: Braille): number {
+	let byte = 0;
+	for (let i = 0; i < 8; i++) {
+		if (braille[i]) byte |= 1 << i;
+	}
+	return byte;
+}
+
+export function byteToBraille(byte: number): Braille {
+	const braille = new Array(8) as Braille;
+	for (let i = 0; i < 8; i++) {
+		braille[i] = (byte & (1 << i)) !== 0;
+	}
+	return braille;
+}
+
 export function charToBraille(char: string): Braille {
 	if (!isBrailleChar(char)) {
 		throw new Error(`"${char}" is not a valid braille character.`);
