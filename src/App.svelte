@@ -28,10 +28,16 @@
 		readStateFromURL,
 		syncStateToURL
 	} from './lib/appState';
+	import { SortableList, sortItems } from '@rodrigodagostino/svelte-sortable-list';
+
+	type UIFrame = { frame: Braille[][]; id: string };
 
 	let activeFrameIdx = $state(0);
-	let frames = $state([createEmptyFrame(MIN_ROWS, MIN_COLS)]);
-	let activeFrame = $derived(frames[activeFrameIdx]);
+	let uiFrames = $state<UIFrame[]>([
+		{ frame: createEmptyFrame(MIN_ROWS, MIN_COLS), id: crypto.randomUUID() }
+	]);
+	let frames = $derived(uiFrames.map(({ frame, id }) => frame));
+	let activeFrame = $derived(uiFrames[activeFrameIdx].frame);
 	let rows = $derived(activeFrame.length);
 	let cols = $derived(activeFrame[0].length);
 	let isPlaying = $state(false);
@@ -49,20 +55,20 @@
 	}
 
 	function addFrame() {
-		frames.push(createEmptyFrame(rows, cols));
+		uiFrames.push({ frame: createEmptyFrame(rows, cols), id: crypto.randomUUID() });
 		activeFrameIdx = frames.length - 1;
 		syncStateToURL({ frames, fps });
 	}
 
 	function deleteFrame(frameIdx: number) {
 		if (frames.length === 1) return;
-		frames.splice(frameIdx, 1);
+		uiFrames.splice(frameIdx, 1);
 		if (activeFrameIdx >= frameIdx) activeFrameIdx = Math.max(0, activeFrameIdx - 1);
 		syncStateToURL({ frames, fps });
 	}
 
 	function duplicateFrame(frameIdx: number) {
-		frames.push(copyFrame(frames[frameIdx]));
+		uiFrames.push({ frame: copyFrame(uiFrames[frameIdx].frame), id: crypto.randomUUID() });
 		activeFrameIdx = frames.length - 1;
 		syncStateToURL({ frames, fps });
 	}
@@ -74,7 +80,7 @@
 				newFrame[r][c] = [...activeFrame[r][c]];
 			}
 		}
-		frames[activeFrameIdx] = newFrame;
+		uiFrames[activeFrameIdx].frame = newFrame;
 		rows = newRows;
 		cols = newCols;
 		syncStateToURL({ frames, fps });
@@ -104,16 +110,16 @@
 	}
 
 	function prevFrame() {
-		activeFrameIdx = (activeFrameIdx - 1 + frames.length) % frames.length;
+		activeFrameIdx = (activeFrameIdx - 1 + uiFrames.length) % uiFrames.length;
 	}
 
 	function nextFrame() {
-		activeFrameIdx = (activeFrameIdx + 1) % frames.length;
+		activeFrameIdx = (activeFrameIdx + 1) % uiFrames.length;
 	}
 
 	function importFrames(newFrames: Braille[][][]) {
 		activeFrameIdx = 0;
-		frames = newFrames;
+		uiFrames = newFrames.map((frame) => ({ frame, id: crypto.randomUUID() }));
 		syncStateToURL({ frames, fps });
 	}
 
@@ -129,13 +135,13 @@
 		);
 		const readState = readStateFromURL();
 		if (readState) {
-			frames = readState.frames;
+			uiFrames = readState.frames.map((frame) => ({ frame, id: crypto.randomUUID() }));
 			fps = readState.fps;
 		}
 
 		unsubscribeHashChange = onURLStateChange((state) => {
 			if (state) {
-				frames = state.frames;
+				uiFrames = state.frames.map((frame) => ({ frame, id: crypto.randomUUID() }));
 				fps = state.fps;
 			}
 		});
@@ -144,6 +150,24 @@
 	onDestroy(() => {
 		unsubscribeHashChange?.();
 	});
+
+	function handleDragStart(e: SortableList.RootEvents['ondragstart']) {
+		const { draggedItemIndex } = e;
+		activeFrameIdx = draggedItemIndex;
+	}
+
+	function handleDragEnd(e: SortableList.RootEvents['ondragend']) {
+		const { draggedItemIndex, targetItemIndex, isCanceled } = e;
+		if (
+			!isCanceled &&
+			typeof targetItemIndex === 'number' &&
+			draggedItemIndex !== targetItemIndex
+		) {
+			activeFrameIdx = targetItemIndex;
+			uiFrames = sortItems(uiFrames, draggedItemIndex, targetItemIndex);
+			syncStateToURL({ frames, fps });
+		}
+	}
 </script>
 
 <Tooltip.Provider delayDuration={400} skipDelayDuration={200}>
@@ -168,7 +192,7 @@
 				<ImportDialog onImport={importFrames} /><CopyDropdownMenu {frames} />
 			</div>
 		</header>
-		<div class="relative flex h-full flex-col justify-between">
+		<main class="relative flex h-full flex-col justify-between">
 			<div class="relative flex flex-1 items-center justify-center">
 				<Canvas {activeFrame} onToggleDot={toggleDot} disabled={isPlaying} />
 				<Toaster />
@@ -182,21 +206,33 @@
 					<div class="flex justify-center">
 						<!-- TIME CONTROL -->
 						<div class="flex gap-1">
-							<TooltipButton onclick={prevFrame} tooltip="Previous Frame [,]" disabled={isPlaying}
-								><span class="icon-[mdi--skip-previous] size-4"></span></TooltipButton
-							>
 							<TooltipButton
+								class="btn"
+								onclick={prevFrame}
+								tooltip="Previous Frame [,]"
+								disabled={isPlaying}
+							>
+								<span class="icon-[mdi--skip-previous] size-4"></span>
+							</TooltipButton>
+							<TooltipButton
+								class="btn"
 								onclick={togglePlay}
 								tooltip={isPlaying ? 'Pause [Space]' : 'Play [Space]'}
-								><span
+							>
+								<span
 									class="size-4"
 									class:icon-[mdi--pause]={isPlaying}
 									class:icon-[mdi--play]={!isPlaying}
-								></span></TooltipButton
+								></span>
+							</TooltipButton>
+							<TooltipButton
+								class="btn"
+								onclick={nextFrame}
+								tooltip="Next Frame [.]"
+								disabled={isPlaying}
 							>
-							<TooltipButton onclick={nextFrame} tooltip="Next Frame [.]" disabled={isPlaying}
-								><span class="icon-[mdi--skip-next] size-4"></span></TooltipButton
-							>
+								<span class="icon-[mdi--skip-next] size-4"></span>
+							</TooltipButton>
 						</div>
 					</div>
 					<div class="flex flex-1 justify-end">
@@ -207,8 +243,6 @@
 								min={MIN_ROWS}
 								max={MAX_ROWS}
 								disabled={isPlaying}
-								onIncrement={() => resizeActiveFrame(rows + 1, cols)}
-								onDecrement={() => resizeActiveFrame(rows - 1, cols)}
 								onChange={(newRows) => resizeActiveFrame(newRows, cols)}
 							/>
 							<FrameSizeControl
@@ -217,8 +251,6 @@
 								min={MIN_COLS}
 								max={MAX_COLS}
 								disabled={isPlaying}
-								onIncrement={() => resizeActiveFrame(rows, cols + 1)}
-								onDecrement={() => resizeActiveFrame(rows, cols - 1)}
 								onChange={(newCols) => resizeActiveFrame(rows, newCols)}
 							/>
 						</div>
@@ -228,19 +260,35 @@
 				<ScrollArea.Root type="auto" class="relative w-screen overflow-hidden">
 					<ScrollArea.Viewport class="focus-visible:border-b-accent border-border  w-full border-b">
 						<div class="flex gap-2 px-4 py-4">
-							{#each frames as frame, idx (idx)}
-								<Frame
-									{frame}
-									label={idx + 1}
-									isActive={idx === activeFrameIdx}
-									canDelete={frames.length !== 1}
-									onSelectFrame={() => selectFrame(idx)}
-									onDeleteFrame={() => deleteFrame(idx)}
-									onDuplicateFrame={() => duplicateFrame(idx)}
-								/>
-							{/each}
-							<TooltipButton onclick={addFrame} tooltip="Add new frame [Shift + N]"
-								><div class="flex h-20 items-center justify-center">
+							<SortableList.Root
+								class="focus-visible:outline-accent focus-visible:outline-1 focus-visible:outline-offset-1"
+								gap={8}
+								direction="horizontal"
+								ondragstart={handleDragStart}
+								ondragend={handleDragEnd}
+								hasLockedAxis={true}
+								aria-label="Frame list"
+							>
+								{#each uiFrames as uiFrame, index (uiFrame.id)}
+									<SortableList.Item
+										class="group focus-visible:outline-muted focus-visible:outline-1 focus-visible:outline-offset-2"
+										id={uiFrame.id}
+										{index}
+									>
+										<Frame
+											{index}
+											frame={uiFrame.frame}
+											isActive={index === activeFrameIdx}
+											canDelete={frames.length !== 1}
+											onSelectFrame={() => selectFrame(index)}
+											onDeleteFrame={() => deleteFrame(index)}
+											onDuplicateFrame={() => duplicateFrame(index)}
+										/>
+									</SortableList.Item>
+								{/each}
+							</SortableList.Root>
+							<TooltipButton class="btn" onclick={addFrame} tooltip="Add new frame [Shift + N]"
+								><div class="flex h-full items-center justify-center">
 									<span class="icon-[mdi--add] size-4"></span>
 								</div></TooltipButton
 							>
@@ -254,6 +302,6 @@
 					</ScrollArea.Scrollbar>
 				</ScrollArea.Root>
 			</div>
-		</div>
+		</main>
 	</div>
 </Tooltip.Provider>

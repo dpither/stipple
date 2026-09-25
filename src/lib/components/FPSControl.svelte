@@ -29,6 +29,7 @@
 			><Slider.Range class="bg-fg absolute h-full"></Slider.Range></span
 		>
 		<Slider.Thumb
+			aria-labelledby="fps-label"
 			index={0}
 			class="transition-colors-default border-border bg-fg hocus:border-accent data-active:border-accent block size-4 cursor-pointer border outline-none"
 		/>

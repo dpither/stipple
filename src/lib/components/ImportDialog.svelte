@@ -44,7 +44,7 @@
 	</Dialog.Trigger>
 	<Dialog.Portal>
 		<Dialog.Overlay
-			class="data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out bg-bg/50 fixed inset-0"
+			class="data-[state=open]:animate-fade-in data-[state=closed]:animate-fade-out bg-bg/50 fixed inset-0 z-1"
 		>
 			<Dialog.Content
 				class="data-[state=open]:animate-scale-in data-[state=closed]:animate-scale-out border-border bg-panel fixed top-1/2 left-1/2 flex w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col border sm:max-w-sm"

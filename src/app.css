@@ -100,13 +100,29 @@
 		outline: none;
 		cursor: pointer;
 	}
+
+	.btn-ghost {
+		color: var(--color-fg);
+		padding: 4px 4px;
+		display: flex;
+		gap: 4px;
+		align-items: center;
+		outline: none;
+		cursor: pointer;
+	}
+
 	.btn:hover,
-	.btn:focus-visible {
+	.btn:focus-visible,
+	.btn-ghost:hover,
+	.btn-ghost:focus-visible {
 		color: var(--color-accent);
 		border-color: var(--color-accent);
 		background-color: var(--color-border);
 	}
-	.btn:disabled {
+
+	.btn:disabled,
+	.btn[data-disabled],
+	.btn-ghost:disabled {
 		color: var(--color-border);
 		pointer-events: none;
 	}
@@ -124,6 +140,7 @@
 
 	.transition-colors-default,
 	.btn,
+	.btn-ghost,
 	.link {
 		transition-property:
 			color, background-color, border-color, outline-color, text-decoration-color, fill, stroke,

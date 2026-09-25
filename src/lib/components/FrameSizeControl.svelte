@@ -7,21 +7,10 @@
 		min: number;
 		max: number;
 		disabled: boolean;
-		onIncrement: () => void;
-		onDecrement: () => void;
 		onChange: (newValue: number) => void;
 	}
 
-	let {
-		label,
-		value = $bindable(),
-		min,
-		max,
-		disabled,
-		onIncrement,
-		onDecrement,
-		onChange
-	}: Props = $props();
+	let { label, value = $bindable(), min, max, disabled, onChange }: Props = $props();
 
 	const options = $derived(
 		Array.from({ length: max - min + 1 }, (_, i) => min + i).map((o) => ({
@@ -36,7 +25,7 @@
 </script>
 
 <div class="flex flex-col gap-1 text-xs md:flex-row md:items-center">
-	<Label.Root id="{label}-label" for={label}>{label}</Label.Root>
+	<Label.Root id="{label}-label">{label}</Label.Root>
 	<Select.Root
 		type="single"
 		items={options}
