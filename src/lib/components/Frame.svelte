@@ -6,22 +6,29 @@
 	interface Props {
 		index: number;
 		frame: Braille[][];
-		isActive: boolean;
+		isSelected: boolean;
 		canDelete: boolean;
 		onSelectFrame: () => void;
 		onDeleteFrame: () => void;
 		onDuplicateFrame: () => void;
 	}
 
-	let { index, frame, isActive, canDelete, onSelectFrame, onDeleteFrame, onDuplicateFrame }: Props =
-		$props();
+	let {
+		index,
+		frame,
+		isSelected,
+		canDelete,
+		onSelectFrame,
+		onDeleteFrame,
+		onDuplicateFrame
+	}: Props = $props();
 	let rows = $derived(frame.length);
 	let cols = $derived(frame[0].length);
 </script>
 
 <div
-	class="border-border hover:border-accent has-focus-visible:border-accent bg-panel group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:border-accent relative flex-none shrink-0 overflow-hidden border group-[[data-is-ghost='false'][data-drag-state*='ptr']]:opacity-0"
-	class:border-muted={isActive}
+	class="border-border hover:border-accent has-focus-visible:border-accent bg-panel group-[[data-is-ghost='true'][data-drag-state*='ptr']]:border-accent relative flex-none shrink-0 overflow-hidden border group-[[data-is-ghost='false'][data-drag-state*='ptr']]:opacity-0"
+	class:border-muted={isSelected}
 >
 	<span class="pointer-events-none absolute top-0 left-0 p-1 text-xs">{index + 1}</span>
 	<span
@@ -52,7 +59,7 @@
 	<button
 		class="flex size-24 cursor-pointer items-center justify-center outline-none"
 		aria-label="select frame {index + 1}"
-		aria-pressed={isActive}
+		aria-pressed={isSelected}
 		onclick={onSelectFrame}
 	>
 		<span class="text-accent leading-4 whitespace-pre">{frameToString(frame)}</span>

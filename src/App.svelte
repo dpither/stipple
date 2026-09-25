@@ -32,62 +32,70 @@
 
 	type UIFrame = { frame: Braille[][]; id: string };
 
-	let activeFrameIdx = $state(0);
 	let uiFrames = $state<UIFrame[]>([
 		{ frame: createEmptyFrame(MIN_ROWS, MIN_COLS), id: crypto.randomUUID() }
 	]);
+	// svelte-ignore state_referenced_locally
+	let selectedId = $state(uiFrames[0].id);
+	let selectedFrame = $derived(uiFrames.find((uiFrame) => uiFrame.id === selectedId)!.frame);
 	let frames = $derived(uiFrames.map(({ frame, id }) => frame));
-	let activeFrame = $derived(uiFrames[activeFrameIdx].frame);
-	let rows = $derived(activeFrame.length);
-	let cols = $derived(activeFrame[0].length);
+	let rows = $derived(selectedFrame.length);
+	let cols = $derived(selectedFrame[0].length);
 	let isPlaying = $state(false);
 	let fps = $state(DEFAULT_FPS);
 	let playbackInterval = -1;
 	let unsubscribeHashChange: (() => void) | undefined;
 
 	function toggleDot(row: number, col: number, dotIdx: number) {
-		activeFrame[row][col][dotIdx] = !activeFrame[row][col][dotIdx];
+		selectedFrame[row][col][dotIdx] = !selectedFrame[row][col][dotIdx];
 		syncStateToURL({ frames, fps });
 	}
 
-	function selectFrame(frameIdx: number) {
-		activeFrameIdx = frameIdx;
+	function selectFrame(frameId: string) {
+		selectedId = frameId;
 	}
 
 	function addFrame() {
 		uiFrames.push({ frame: createEmptyFrame(rows, cols), id: crypto.randomUUID() });
-		activeFrameIdx = frames.length - 1;
+		selectedId = uiFrames[uiFrames.length - 1].id;
 		syncStateToURL({ frames, fps });
 	}
 
-	function deleteFrame(frameIdx: number) {
-		if (frames.length === 1) return;
-		uiFrames.splice(frameIdx, 1);
-		if (activeFrameIdx >= frameIdx) activeFrameIdx = Math.max(0, activeFrameIdx - 1);
+	function deleteFrame(targetId: string) {
+		if (uiFrames.length === 1) return;
+		const targetIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === targetId);
+		uiFrames = uiFrames.filter((uiFrames) => uiFrames.id != targetId);
+		if (targetId == selectedId) {
+			selectedId = uiFrames[targetIndex]?.id ?? uiFrames[uiFrames.length - 1].id;
+		}
 		syncStateToURL({ frames, fps });
 	}
 
-	function duplicateFrame(frameIdx: number) {
-		uiFrames.push({ frame: copyFrame(uiFrames[frameIdx].frame), id: crypto.randomUUID() });
-		activeFrameIdx = frames.length - 1;
+	function duplicateFrame(targetId: string) {
+		const frameIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === targetId);
+		uiFrames.push({ frame: copyFrame(uiFrames[frameIndex].frame), id: crypto.randomUUID() });
+		selectedId = uiFrames[uiFrames.length - 1].id;
 		syncStateToURL({ frames, fps });
 	}
 
-	function resizeActiveFrame(newRows: number, newCols: number) {
+	function resizeSelectedFrame(newRows: number, newCols: number) {
+		const target = uiFrames.find((uiFrame) => uiFrame.id === selectedId)!;
 		const newFrame = createEmptyFrame(newRows, newCols);
-		for (let r = 0; r < Math.min(newRows, activeFrame.length); r++) {
-			for (let c = 0; c < Math.min(newCols, activeFrame[0].length); c++) {
-				newFrame[r][c] = [...activeFrame[r][c]];
+		for (let r = 0; r < Math.min(newRows, selectedFrame.length); r++) {
+			for (let c = 0; c < Math.min(newCols, selectedFrame[0].length); c++) {
+				newFrame[r][c] = [...selectedFrame[r][c]];
 			}
 		}
-		uiFrames[activeFrameIdx].frame = newFrame;
+		target.frame = newFrame;
 		rows = newRows;
 		cols = newCols;
 		syncStateToURL({ frames, fps });
 	}
 
 	function tick() {
-		activeFrameIdx = (activeFrameIdx + 1) % frames.length;
+		const currentIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === selectedId);
+		const nextIndex = (currentIndex + 1) % uiFrames.length;
+		selectedId = uiFrames[nextIndex].id;
 	}
 
 	function updateFPS(newFPS: number) {
@@ -110,16 +118,20 @@
 	}
 
 	function prevFrame() {
-		activeFrameIdx = (activeFrameIdx - 1 + uiFrames.length) % uiFrames.length;
+		const currentIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === selectedId);
+		const nextIndex = (currentIndex - 1 + uiFrames.length) % uiFrames.length;
+		selectedId = uiFrames[nextIndex].id;
 	}
 
 	function nextFrame() {
-		activeFrameIdx = (activeFrameIdx + 1) % uiFrames.length;
+		const currentIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === selectedId);
+		const nextIndex = (currentIndex + 1) % uiFrames.length;
+		selectedId = uiFrames[nextIndex].id;
 	}
 
 	function importFrames(newFrames: Braille[][][]) {
-		activeFrameIdx = 0;
 		uiFrames = newFrames.map((frame) => ({ frame, id: crypto.randomUUID() }));
+		selectedId = uiFrames[0].id;
 		syncStateToURL({ frames, fps });
 	}
 
@@ -130,12 +142,13 @@
 			nextFrame,
 			prevFrame,
 			addFrame,
-			() => duplicateFrame(activeFrameIdx),
-			() => deleteFrame(activeFrameIdx)
+			() => duplicateFrame(selectedId),
+			() => deleteFrame(selectedId)
 		);
 		const readState = readStateFromURL();
 		if (readState) {
 			uiFrames = readState.frames.map((frame) => ({ frame, id: crypto.randomUUID() }));
+			selectedId = uiFrames[0].id;
 			fps = readState.fps;
 		}
 
@@ -153,7 +166,7 @@
 
 	function handleDragStart(e: SortableList.RootEvents['ondragstart']) {
 		const { draggedItemIndex } = e;
-		activeFrameIdx = draggedItemIndex;
+		selectedId = uiFrames[draggedItemIndex].id;
 	}
 
 	function handleDragEnd(e: SortableList.RootEvents['ondragend']) {
@@ -163,7 +176,6 @@
 			typeof targetItemIndex === 'number' &&
 			draggedItemIndex !== targetItemIndex
 		) {
-			activeFrameIdx = targetItemIndex;
 			uiFrames = sortItems(uiFrames, draggedItemIndex, targetItemIndex);
 			syncStateToURL({ frames, fps });
 		}
@@ -194,7 +206,7 @@
 		</header>
 		<main class="relative flex h-full flex-col justify-between">
 			<div class="relative flex flex-1 items-center justify-center">
-				<Canvas {activeFrame} onToggleDot={toggleDot} disabled={isPlaying} />
+				<Canvas {selectedFrame} onToggleDot={toggleDot} disabled={isPlaying} />
 				<Toaster />
 			</div>
 			<!-- BOTTOM PANEL -->
@@ -243,7 +255,7 @@
 								min={MIN_ROWS}
 								max={MAX_ROWS}
 								disabled={isPlaying}
-								onChange={(newRows) => resizeActiveFrame(newRows, cols)}
+								onChange={(newRows) => resizeSelectedFrame(newRows, cols)}
 							/>
 							<FrameSizeControl
 								label="Cols"
@@ -251,7 +263,7 @@
 								min={MIN_COLS}
 								max={MAX_COLS}
 								disabled={isPlaying}
-								onChange={(newCols) => resizeActiveFrame(rows, newCols)}
+								onChange={(newCols) => resizeSelectedFrame(rows, newCols)}
 							/>
 						</div>
 					</div>
@@ -278,11 +290,11 @@
 										<Frame
 											{index}
 											frame={uiFrame.frame}
-											isActive={index === activeFrameIdx}
+											isSelected={uiFrame.id === selectedId}
 											canDelete={frames.length !== 1}
-											onSelectFrame={() => selectFrame(index)}
-											onDeleteFrame={() => deleteFrame(index)}
-											onDuplicateFrame={() => duplicateFrame(index)}
+											onSelectFrame={() => selectFrame(uiFrame.id)}
+											onDeleteFrame={() => deleteFrame(uiFrame.id)}
+											onDuplicateFrame={() => duplicateFrame(uiFrame.id)}
 										/>
 									</SortableList.Item>
 								{/each}
