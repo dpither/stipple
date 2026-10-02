@@ -27,7 +27,7 @@
 </script>
 
 <div
-	class="border-border hover:border-accent has-focus-visible:border-accent bg-panel group-[[data-is-ghost='true'][data-drag-state*='ptr']]:border-accent relative flex-none shrink-0 overflow-hidden border group-[[data-is-ghost='false'][data-drag-state*='ptr']]:opacity-0"
+	class="transition-colors-default border-border hover:border-accent has-focus-visible:border-accent bg-panel group-[[data-is-ghost='true'][data-drag-state='idle']]:border-accent group-[[data-is-ghost='true'][data-drag-state*='ptr']]:border-accent group-data-[drag-state*='kbd-drag']:border-accent relative flex-none shrink-0 overflow-hidden border group-[[data-is-ghost='false'][data-drag-state*='ptr']]:opacity-0"
 	class:border-muted={isSelected}
 >
 	<span class="pointer-events-none absolute top-0 left-0 p-1 text-xs">{index + 1}</span>
@@ -49,13 +49,15 @@
 			<span class="icon-[material-symbols--content-copy-sharp] size-4"></span>
 		</TooltipButton>
 	</div>
-	<div class="absolute -bottom-px -left-px">
-		<SortableList.ItemHandle
-			class="group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:bg-border group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:text-accent hover:text-accent hover:bg-border flex p-1"
-		>
-			<span class="icon-[material-symbols--drag-indicator] size-4"></span>
-		</SortableList.ItemHandle>
-	</div>
+	<SortableList.ItemHandle>
+		<div class="absolute -bottom-px -left-px">
+			<div
+				class="transition-colors-default hover:bg-border group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:bg-border group-[[data-is-ghost='true'][data-drag-state='idle']]:bg-border hover:text-accent group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:text-accent group-[[data-is-ghost='true'][data-drag-state='idle']]:text-accent flex p-1"
+			>
+				<span class="icon-[material-symbols--drag-indicator] size-4"></span>
+			</div>
+		</div></SortableList.ItemHandle
+	>
 	<button
 		class="flex size-24 cursor-pointer items-center justify-center outline-none"
 		aria-label="select frame {index + 1}"

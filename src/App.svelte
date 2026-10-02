@@ -279,11 +279,16 @@
 								ondragstart={handleDragStart}
 								ondragend={handleDragEnd}
 								hasLockedAxis={true}
+								hasBoundaries={true}
+								transition={{
+									duration: 150,
+									easing: 'cubic-bezier(0.6, 0, 0.4, 1)'
+								}}
 								aria-label="Frame list"
 							>
 								{#each uiFrames as uiFrame, index (uiFrame.id)}
 									<SortableList.Item
-										class="group focus-visible:outline-muted focus-visible:outline-1 focus-visible:outline-offset-2"
+										class="group focus-visible:outline-accent focus-visible:outline-1 focus-visible:outline-offset-2"
 										id={uiFrame.id}
 										{index}
 									>
