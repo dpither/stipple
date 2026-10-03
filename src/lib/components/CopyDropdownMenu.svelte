@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { DropdownMenu } from 'bits-ui';
-	import { type Braille, framesToPlainText, framesToJSON } from '../braille';
+	import { type Braille, framesToPlainText, framesToJSON, framesToCSS } from '../braille';
 	import { showToast } from '../toast.svelte';
 
 	interface Props {
 		frames: Braille[][][];
+		fps: number;
 	}
 
-	let { frames }: Props = $props();
+	let { frames, fps }: Props = $props();
 
 	const exportOptions = [
 		{
@@ -21,6 +22,12 @@
 			subtitle: 'Animation frames as a data array',
 			getValue: () => framesToJSON(frames),
 			copyText: 'JSON'
+		},
+		{
+			label: 'CSS',
+			subtitle: 'Animation as a CSS class and keyframes',
+			getValue: () => framesToCSS(frames, fps),
+			copyText: 'CSS'
 		},
 		{
 			label: 'Link',

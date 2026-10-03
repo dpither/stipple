@@ -97,3 +97,41 @@ export function parseInput(input: string): Braille[][][] {
 	// Try Plain Text
 	return plainTextToFrames(input);
 }
+
+// CSS
+function frameToCSSContent(frame: Braille[][]): string {
+	return frame.map((row) => row.map(brailleToChar).join('')).join('\\A');
+}
+export function framesToCSS(frames: Braille[][][], fps: number): string {
+	const name = 'stipple-animation';
+	const durationMs = ((frames.length * 1000) / fps).toFixed(4);
+	const step = 100 / frames.length;
+	const keyframeLines = frames.map((frame, i) => {
+		const percent = (i * step).toFixed(4);
+		return `	${percent}% { content: "${frameToCSSContent(frame)}"; }`;
+	});
+	const maxRows = Math.max(...frames.map((frame) => frame.length));
+	const maxCols = Math.max(...frames.map((frame) => Math.max(...frame.map((row) => row.length))));
+
+	return `
+.${name}::before {
+  content: "${frameToCSSContent(frames[0])}";
+  display: inline-block;
+  font-family: monospace;
+  white-space: pre;
+  width: ${maxCols}ch;
+  line-height: 1.2;
+  min-height: ${maxRows * 1.2}em;
+  animation: ${name} ${durationMs}ms steps(1) infinite;
+}
+
+@keyframes ${name} {
+${keyframeLines.join('\n')}
+  100% { content: "${frameToCSSContent(frames[0])}"; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .${name}::before { animation: none; }
+}
+`.trim();
+}

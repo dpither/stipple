@@ -201,7 +201,7 @@
 				</div>
 			</div>
 			<div class="flex flex-1 justify-end gap-2">
-				<ImportDialog onImport={importFrames} /><CopyDropdownMenu {frames} />
+				<ImportDialog onImport={importFrames} /><CopyDropdownMenu {frames} {fps} />
 			</div>
 		</header>
 		<main class="relative flex h-full flex-col justify-between">

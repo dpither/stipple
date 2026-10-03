@@ -51,11 +51,13 @@
 	</div>
 	<SortableList.ItemHandle>
 		<div class="absolute -bottom-px -left-px">
-			<div
-				class="transition-colors-default hover:bg-border group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:bg-border group-[[data-is-ghost='true'][data-drag-state='idle']]:bg-border hover:text-accent group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:text-accent group-[[data-is-ghost='true'][data-drag-state='idle']]:text-accent flex p-1"
+			<TooltipButton
+				class="transition-colors-default hover:bg-border group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:bg-border group-[[data-is-ghost='true'][data-drag-state='idle']]:bg-border hover:text-accent group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:text-accent group-[[data-is-ghost='true'][data-drag-state='idle']]:text-accent flex cursor-grab p-1"
+				onclick={() => {}}
+				tooltip="Move frame"
 			>
-				<span class="icon-[material-symbols--drag-indicator] size-4"></span>
-			</div>
+				<span class="icon-[material-symbols--drag-pan] size-4"></span>
+			</TooltipButton>
 		</div></SortableList.ItemHandle
 	>
 	<button

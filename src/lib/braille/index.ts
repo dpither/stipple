@@ -25,5 +25,6 @@ export {
 	validateFrames,
 	framesToPlainText,
 	framesToJSON,
+	framesToCSS,
 	parseInput
 } from './formats';
