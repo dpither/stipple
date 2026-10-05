@@ -8,6 +8,7 @@
 		frame: Braille[][];
 		isSelected: boolean;
 		canDelete: boolean;
+		canDuplicate: boolean;
 		onSelectFrame: () => void;
 		onDeleteFrame: () => void;
 		onDuplicateFrame: () => void;
@@ -18,6 +19,7 @@
 		frame,
 		isSelected,
 		canDelete,
+		canDuplicate,
 		onSelectFrame,
 		onDeleteFrame,
 		onDuplicateFrame
@@ -27,7 +29,7 @@
 </script>
 
 <div
-	class="transition-colors-default border-border hover:border-accent has-focus-visible:border-accent bg-panel group-[[data-is-ghost='true'][data-drag-state='idle']]:border-accent group-[[data-is-ghost='true'][data-drag-state*='ptr']]:border-accent group-data-[drag-state*='kbd-drag']:border-accent relative flex-none shrink-0 overflow-hidden border group-[[data-is-ghost='false'][data-drag-state*='ptr']]:opacity-0"
+	class="transition-colors-default border-border hover:border-accent has-focus-visible:border-accent bg-panel group-[[data-is-ghost='true'][data-drag-state='idle']]:border-accent group-[[data-is-ghost='true'][data-drag-state*='ptr']]:border-accent group-data-[drag-state*='kbd-drag']:border-accent relative shrink-0 flex-nowrap overflow-hidden border group-[[data-is-ghost='false'][data-drag-state*='ptr']]:opacity-0"
 	class:border-muted={isSelected}
 >
 	<span class="pointer-events-none absolute top-0 left-0 p-1 text-xs">{index + 1}</span>
@@ -35,31 +37,36 @@
 		class="text-muted pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 p-1 text-center text-xs"
 		>{rows}x{cols}</span
 	>
-	<div class="absolute -top-px -right-px" class:hidden={!canDelete}>
-		<TooltipButton class="btn-ghost" onclick={onDeleteFrame} tooltip="Delete frame [Delete]">
-			<span class="icon-[material-symbols--delete-sharp] size-4"></span>
-		</TooltipButton>
-	</div>
-	<div class="absolute -right-px -bottom-px">
-		<TooltipButton
-			class="btn-ghost"
-			onclick={onDuplicateFrame}
-			tooltip="Duplicate frame [Shift + D]"
-		>
-			<span class="icon-[material-symbols--content-copy-sharp] size-4"></span>
-		</TooltipButton>
-	</div>
-	<SortableList.ItemHandle>
-		<div class="absolute -bottom-px -left-px">
-			<TooltipButton
-				class="transition-colors-default hover:bg-border group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:bg-border group-[[data-is-ghost='true'][data-drag-state='idle']]:bg-border hover:text-accent group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:text-accent group-[[data-is-ghost='true'][data-drag-state='idle']]:text-accent flex cursor-grab p-1"
-				onclick={() => {}}
-				tooltip="Move frame"
-			>
-				<span class="icon-[material-symbols--drag-pan] size-4"></span>
+	{#if canDelete}
+		<div class="absolute -top-px -right-px">
+			<TooltipButton class="btn-ghost" onclick={onDeleteFrame} tooltip="Delete frame [Delete]">
+				<span class="icon-[material-symbols--delete-sharp] size-4"></span>
 			</TooltipButton>
-		</div></SortableList.ItemHandle
-	>
+		</div>
+	{/if}
+
+	{#if canDuplicate}
+		<div class="absolute -right-px -bottom-px">
+			<TooltipButton
+				class="btn-ghost"
+				onclick={onDuplicateFrame}
+				tooltip="Duplicate frame [Shift + D]"
+			>
+				<span class="icon-[material-symbols--content-copy-sharp] size-4"></span>
+			</TooltipButton>
+		</div>
+	{/if}
+
+	{#if canDelete}
+		<SortableList.ItemHandle>
+			<div
+				class="transition-colors-default hover:bg-border group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:bg-border group-[[data-is-ghost='true'][data-drag-state='idle']]:bg-border hover:text-accent group-[[data-is-ghost='true'][data-drag-state*='ptr-drag']]:text-accent group-[[data-is-ghost='true'][data-drag-state='idle']]:text-accent absolute -bottom-px -left-px flex cursor-grab p-1"
+			>
+				<span class="icon-[material-symbols--drag-pan] size-4" tabindex="-1"></span>
+			</div></SortableList.ItemHandle
+		>
+	{/if}
+
 	<button
 		class="flex size-24 cursor-pointer items-center justify-center outline-none"
 		aria-label="select frame {index + 1}"

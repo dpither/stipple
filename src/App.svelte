@@ -3,7 +3,7 @@
 	import Canvas from './lib/components/Canvas.svelte';
 	import Frame from './lib/components/Frame.svelte';
 	import TooltipButton from './lib/components/TooltipButton.svelte';
-	import { onDestroy, onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { initKeyboardShortcuts } from './lib/keyboardShortcuts';
 	import FPSControl from './lib/components/FPSControl.svelte';
 	import FrameSizeControl from './lib/components/FrameSizeControl.svelte';
@@ -16,7 +16,8 @@
 		MAX_COLS,
 		createEmptyFrame,
 		copyFrame,
-		type Braille
+		type Braille,
+		MAX_FRAMES
 	} from './lib/braille';
 	import Logo from './lib/components/Logo.svelte';
 	import Toaster from './lib/components/Toaster.svelte';
@@ -38,13 +39,12 @@
 	// svelte-ignore state_referenced_locally
 	let selectedId = $state(uiFrames[0].id);
 	let selectedFrame = $derived(uiFrames.find((uiFrame) => uiFrame.id === selectedId)!.frame);
-	let frames = $derived(uiFrames.map(({ frame, id }) => frame));
+	let frames = $derived(uiFrames.map(({ frame }) => frame));
 	let rows = $derived(selectedFrame.length);
 	let cols = $derived(selectedFrame[0].length);
 	let isPlaying = $state(false);
 	let fps = $state(DEFAULT_FPS);
 	let playbackInterval = -1;
-	let unsubscribeHashChange: (() => void) | undefined;
 
 	function toggleDot(row: number, col: number, dotIdx: number) {
 		selectedFrame[row][col][dotIdx] = !selectedFrame[row][col][dotIdx];
@@ -53,11 +53,14 @@
 
 	function selectFrame(frameId: string) {
 		selectedId = frameId;
+		scrollToFrame(frameId);
 	}
 
 	function addFrame() {
-		uiFrames.push({ frame: createEmptyFrame(rows, cols), id: crypto.randomUUID() });
-		selectedId = uiFrames[uiFrames.length - 1].id;
+		if (frames.length >= MAX_FRAMES) return;
+		const newId = crypto.randomUUID();
+		uiFrames.push({ frame: createEmptyFrame(rows, cols), id: newId });
+		selectFrame(newId);
 		syncStateToURL({ frames, fps });
 	}
 
@@ -72,9 +75,14 @@
 	}
 
 	function duplicateFrame(targetId: string) {
+		if (frames.length >= MAX_FRAMES) return;
 		const frameIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === targetId);
-		uiFrames.push({ frame: copyFrame(uiFrames[frameIndex].frame), id: crypto.randomUUID() });
-		selectedId = uiFrames[uiFrames.length - 1].id;
+		const newId = crypto.randomUUID();
+		uiFrames.splice(frameIndex + 1, 0, {
+			frame: copyFrame(uiFrames[frameIndex].frame),
+			id: newId
+		});
+		selectFrame(newId);
 		syncStateToURL({ frames, fps });
 	}
 
@@ -92,7 +100,7 @@
 		syncStateToURL({ frames, fps });
 	}
 
-	function tick() {
+	function tickAnimation() {
 		const currentIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === selectedId);
 		const nextIndex = (currentIndex + 1) % uiFrames.length;
 		selectedId = uiFrames[nextIndex].id;
@@ -102,7 +110,7 @@
 		fps = Math.max(Math.min(newFPS, MAX_FPS), MIN_FPS);
 		if (isPlaying) {
 			clearInterval(playbackInterval);
-			playbackInterval = setInterval(tick, 1000 / fps);
+			playbackInterval = setInterval(tickAnimation, 1000 / fps);
 		}
 		syncStateToURL({ frames, fps });
 	}
@@ -110,23 +118,24 @@
 	function togglePlay() {
 		if (isPlaying) {
 			isPlaying = false;
+			scrollToFrame(selectedId);
 			clearInterval(playbackInterval);
 		} else {
 			isPlaying = true;
-			playbackInterval = setInterval(tick, 1000 / fps);
+			playbackInterval = setInterval(tickAnimation, 1000 / fps);
 		}
 	}
 
 	function prevFrame() {
 		const currentIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === selectedId);
 		const nextIndex = (currentIndex - 1 + uiFrames.length) % uiFrames.length;
-		selectedId = uiFrames[nextIndex].id;
+		selectFrame(uiFrames[nextIndex].id);
 	}
 
 	function nextFrame() {
 		const currentIndex = uiFrames.findIndex((uiFrame) => uiFrame.id === selectedId);
 		const nextIndex = (currentIndex + 1) % uiFrames.length;
-		selectedId = uiFrames[nextIndex].id;
+		selectFrame(uiFrames[nextIndex].id);
 	}
 
 	function importFrames(newFrames: Braille[][][]) {
@@ -135,8 +144,18 @@
 		syncStateToURL({ frames, fps });
 	}
 
+	async function scrollToFrame(id: string) {
+		await tick();
+		await new Promise((r) => setTimeout(r, 150));
+		document.getElementById(id)?.scrollIntoView({
+			behavior: 'smooth',
+			inline: 'nearest',
+			block: 'nearest'
+		});
+	}
+
 	onMount(() => {
-		initKeyboardShortcuts(
+		const cleanupShortcuts = initKeyboardShortcuts(
 			togglePlay,
 			() => isPlaying,
 			nextFrame,
@@ -146,22 +165,26 @@
 			() => deleteFrame(selectedId)
 		);
 		const readState = readStateFromURL();
+
 		if (readState) {
 			uiFrames = readState.frames.map((frame) => ({ frame, id: crypto.randomUUID() }));
 			selectedId = uiFrames[0].id;
 			fps = readState.fps;
+		} else {
+			syncStateToURL({ frames, fps });
 		}
 
-		unsubscribeHashChange = onURLStateChange((state) => {
+		const unsubscribeHashChange = onURLStateChange((state) => {
 			if (state) {
 				uiFrames = state.frames.map((frame) => ({ frame, id: crypto.randomUUID() }));
 				fps = state.fps;
 			}
 		});
-	});
 
-	onDestroy(() => {
-		unsubscribeHashChange?.();
+		return () => {
+			unsubscribeHashChange();
+			cleanupShortcuts();
+		};
 	});
 
 	function handleDragStart(e: SortableList.RootEvents['ondragstart']) {
@@ -269,9 +292,11 @@
 					</div>
 				</div>
 				<!-- FRAME LIST -->
-				<ScrollArea.Root type="auto" class="relative w-screen overflow-hidden">
-					<ScrollArea.Viewport class="focus-visible:border-b-accent border-border  w-full border-b">
-						<div class="flex gap-2 px-4 py-4">
+				<ScrollArea.Root type="auto" class="relative w-full overflow-clip">
+					<ScrollArea.Viewport
+						class="focus-visible:border-t-accent border-border scroll-px-13 border-b focus-visible:border-t"
+					>
+						<div class="flex w-max gap-2 px-4 py-4">
 							<SortableList.Root
 								class="focus-visible:outline-accent focus-visible:outline-1 focus-visible:outline-offset-1"
 								gap={8}
@@ -297,6 +322,7 @@
 											frame={uiFrame.frame}
 											isSelected={uiFrame.id === selectedId}
 											canDelete={frames.length !== 1}
+											canDuplicate={frames.length < MAX_FRAMES}
 											onSelectFrame={() => selectFrame(uiFrame.id)}
 											onDeleteFrame={() => deleteFrame(uiFrame.id)}
 											onDuplicateFrame={() => duplicateFrame(uiFrame.id)}
@@ -304,11 +330,13 @@
 									</SortableList.Item>
 								{/each}
 							</SortableList.Root>
-							<TooltipButton class="btn" onclick={addFrame} tooltip="Add new frame [Shift + N]"
-								><div class="flex h-full items-center justify-center">
-									<span class="icon-[mdi--add] size-4"></span>
-								</div></TooltipButton
-							>
+							{#if frames.length < MAX_FRAMES}
+								<TooltipButton class="btn" onclick={addFrame} tooltip="Add new frame [Shift + N]"
+									><div class="flex h-full items-center justify-center">
+										<span class="icon-[mdi--add] size-4"></span>
+									</div></TooltipButton
+								>
+							{/if}
 						</div>
 					</ScrollArea.Viewport>
 					<ScrollArea.Scrollbar

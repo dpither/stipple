@@ -6,7 +6,7 @@ export function initKeyboardShortcuts(
 	addFrame: () => void,
 	duplicateFrame: () => void,
 	deleteFrame: () => void
-) {
+): () => void {
 	function handleKeydown(e: KeyboardEvent) {
 		const activeElement = document.activeElement;
 
