@@ -17,7 +17,8 @@
 		createEmptyFrame,
 		copyFrame,
 		type Braille,
-		MAX_FRAMES
+		MAX_FRAMES,
+		frameToString
 	} from './lib/braille';
 	import Logo from './lib/components/Logo.svelte';
 	import Toaster from './lib/components/Toaster.svelte';
@@ -228,9 +229,13 @@
 			</div>
 		</header>
 		<main class="relative flex h-full flex-col justify-between">
-			<div class="relative flex flex-1 items-center justify-center">
+			<div class="relative flex min-h-101 flex-1 items-center justify-center">
 				<Canvas {selectedFrame} onToggleDot={toggleDot} disabled={isPlaying} />
 				<Toaster />
+				<span
+					class="text-accent absolute bottom-4 left-1/2 -translate-x-1/2 leading-4 whitespace-pre"
+					>{frameToString(selectedFrame)}</span
+				>
 			</div>
 			<!-- BOTTOM PANEL -->
 			<div class="bg-panel border-border flex flex-col border-t">
