@@ -14,10 +14,18 @@ I've always enjoyed the simplicity and charm of using text as an artistic medium
 
 ## Features
 
-- Import and copy frames as plain text or JSON
+- Copy frames as plain text, JSON, CSS or a sharable link
+- Import frames as plain text or JSON
 - Configurable playback speed (1-60 FPS)
 - Configurable frame size up to 2 x 4 characters (8 x 8 dots)
+- Drag frames to reorder
 - Keyboard shortcuts
+  - Toggle play - <kbd>Space</kbd>
+  - Next frame - <kbd>.</kbd>
+  - Previous frame - <kbd>,</kbd>
+  - New blank frame - <kbd>Shift</kbd> + <kbd>N</kbd>
+  - Duplicate current frame - <kbd>Shift</kbd> + <kbd>D</kbd>
+  - Delete current frame - <kbd>Delete</kbd>
 - Mobile Friendly
 
 ## Getting Started
@@ -49,14 +57,15 @@ npm run preview
 
 ## Tech Stack
 
-- Typescript - Type safety
-- Svelte - UI framework
-- Tailwind CSS - Styling
-- Bits UI - Headless UI components
-- Vite - Build tool and dev server
+- [Typescript](https://www.typescriptlang.org/) - Type safety
+- [Svelte](https://svelte.dev/) - UI framework
+- [Tailwind CSS](https://tailwindcss.com/) - Styling
+- [Vite](https://vite.dev/) - Build tool and dev server
+- [Bits UI](https://www.bits-ui.com/) - Headless UI components
+- [Svelte Sortable List](https://github.com/rodrigodagostino/svelte-sortable-list) - Sortable list
 
 ## Roadmap
 
-- Copy as CSS
-- Drag and drop to reorder frames
-- Preview window of actual text character animation
+- Undo/Redo Actions
+- Erase Tool
+- Paint Tool (Make default behaviour?)

@@ -210,19 +210,17 @@
 	<div class="flex h-screen flex-col">
 		<!-- HEADER -->
 		<header class="flex items-center px-4 py-2">
-			<div class="flex items-baseline justify-start gap-4">
+			<div class="items- flex items-center justify-start gap-4">
 				<Logo />
-				<div class="text-muted text-xs">
-					<a
-						href="https://github.com/dpither/stipple"
-						target="_blank"
-						rel="noopener noreferrer external"
-						aria-label="source code (opens in new tab)"
-						class="link flex items-center gap-1"
-					>
-						v1.0
-					</a>
-				</div>
+				<a
+					href="https://github.com/dpither/stipple"
+					target="_blank"
+					rel="noopener noreferrer external"
+					aria-label="source code (opens in new tab)"
+					class="transition-colors-default hocus:text-accent text-fg flex items-center outline-none"
+				>
+					<span class="icon-[mdi--github] size-6"></span>
+				</a>
 			</div>
 			<div class="flex flex-1 justify-end gap-2">
 				<ImportDialog onImport={importFrames} /><CopyDropdownMenu {frames} {fps} />

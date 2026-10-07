@@ -38,7 +38,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <a
-	class="hocus:text-accent flex items-center text-xl tracking-widest outline-none"
+	class="transition-colors-default hocus:text-accent flex items-center text-xl tracking-widest outline-none"
 	href="/"
 	onmouseenter={playAnimation}
 	aria-label="Stipple"
