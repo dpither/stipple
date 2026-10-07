@@ -9,7 +9,7 @@ I've always enjoyed the simplicity and charm of using text as an artistic medium
 ## Preview
 
 <p align="center">
-  <img width="1920" height="1080" alt="stipple-preview" src="https://github.com/user-attachments/assets/dc747054-9f72-4e0a-b211-27c1caf7d4e2" />
+  <img width="1920" height="1080" alt="stipple-preview" src="https://github.com/user-attachments/assets/ab53e447-f2a2-41a3-951b-dd875dc33768" />
 </p>
 
 ## Features
