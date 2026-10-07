@@ -39,7 +39,7 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <a
 	class="transition-colors-default hocus:text-accent flex items-center text-xl tracking-widest outline-none"
-	href="/"
+	href={import.meta.env.BASE_URL}
 	onmouseenter={playAnimation}
 	aria-label="Stipple"
 >
